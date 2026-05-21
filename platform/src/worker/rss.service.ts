@@ -14,6 +14,7 @@ export class RssService {
 
   constructor() {
     this.parser = new Parser({
+      timeout: 10_000, // Timeout de 10 secondes pour éviter les blocages
       customFields: {
         item: [
           ["content:encoded", "contentEncoded"],
