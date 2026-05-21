@@ -9,7 +9,6 @@ export class NotionService {
     this.notion = new Client({ auth: NOTION_CONFIG.token });
   }
 
-
   async itemExists(link: string): Promise<boolean> {
     const response = await this.notion.databases.query({
       database_id: NOTION_CONFIG.databaseId,
@@ -28,7 +27,7 @@ export class NotionService {
       properties: {
         Nom: { title: [{ text: { content: item.title } }] },
         URL: { url: item.link },
-        Catégories: { multi_select: categories.map(c => ({ name: c })) },
+        Catégories: { multi_select: categories.map((c) => ({ name: c })) },
         Date: { date: { start: item.isoDate } },
         Statut: { status: { name: "A lire" } },
       },
@@ -42,7 +41,9 @@ export class NotionService {
     let hasMore = true;
     let nextCursor: string | undefined = undefined;
 
-    console.log(`🧹 Recherche et archivage des articles antérieurs au ${cutoffDate.toISOString().split('T')[0]}...`);
+    console.log(
+      `🧹 Recherche et archivage des articles antérieurs au ${cutoffDate.toISOString().split("T")[0]}...`,
+    );
 
     let archivedCount = 0;
 
@@ -65,7 +66,9 @@ export class NotionService {
       for (const page of response.results) {
         await this.notion.pages.update({
           page_id: page.id,
-          archived: true,
+          properties: {
+            Statut: { status: { name: "Archivé" } },
+          },
         });
         archivedCount++;
       }

@@ -56,6 +56,9 @@ model Article {
   
   feed        Feed     @relation(fields: [feedId], references: [id], onDelete: Cascade)
   summaries   AiSummary[]
+
+  @@index([feedId])
+  @@index([publishDate(sort: Desc)])
 }
 
 model AiSummary {
@@ -69,5 +72,6 @@ model AiSummary {
   article     Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  @@index([articleId])
   @@index([promptHash])
 }

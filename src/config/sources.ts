@@ -10,11 +10,6 @@ export interface RssSource {
 export const RSS_SOURCES: RssSource[] = [
   { name: "Next.js", url: "https://nextjs.org/feed.xml", category: "Frontend" },
   {
-    name: "NestJS",
-    url: "https://trilon.io/blog/rss.xml",
-    category: "Backend",
-  },
-  {
     name: "TypeScript",
     url: "https://devblogs.microsoft.com/typescript/feed/",
     category: "Language",
@@ -22,7 +17,22 @@ export const RSS_SOURCES: RssSource[] = [
   {
     name: "Rust",
     url: "https://blog.rust-lang.org/feed.xml",
-    category: "Language",
+    category: "Backend",
+  },
+  {
+    name: "React.js",
+    url: "https://react.dev/rss.xml",
+    category: "Frontend",
+  },
+  {
+    name: "Node.js",
+    category: "Backend",
+    url: "https://nodejs.org/en/feed/blog.xml",
+  },
+  {
+    name: "AI/ML",
+    category: "AI",
+    url: "https://stackoverflow.blog/feed/",
   },
 ];
 
@@ -32,5 +42,5 @@ export const NOTION_CONFIG = {
 };
 
 export const SYNC_CONFIG = {
-  maxAgeDays: 7, // On ne garde que les articles des 7 derniers jours
+  maxAgeDays: 20,
 };
