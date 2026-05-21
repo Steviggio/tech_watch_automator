@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  name                   String?
+  createdAt              DateTime  @default(now())
+  customPromptRefinement String?   // Texte libre pour affiner les résumés
+
+  subscriptions          Subscription[]
+  aiSummaries            AiSummary[]
+}
+
+model SummaryFilter {
+  id             String @id @default(cuid())
+  name           String // Ex: "Filtre Technique"
+  promptModifier String // Ex: "Concentre-toi uniquement sur les implémentations..."
+}
+
+model Feed {
+  id          String   @id @default(cuid())
+  url         String   @unique
+  title       String
+  websiteUrl  String?
+  favicon     String?
+  
+  subscriptions Subscription[]
+  articles      Article[]
+}
+
+model Subscription {
+  id      String @id @default(cuid())
+  userId  String
+  feedId  String
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feed    Feed   @relation(fields: [feedId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, feedId])
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  feedId      String
+  title       String
+  url         String   @unique
+  publishDate DateTime
+  rawContent  String
+  
+  feed        Feed     @relation(fields: [feedId], references: [id], onDelete: Cascade)
+  summaries   AiSummary[]
+}
+
+model AiSummary {
+  id          String   @id @default(cuid())
+  articleId   String
+  userId      String?  // Optionnel: null si le résumé est partagé par le cache
+  promptHash  String   // Hash pour le cache intelligent
+  content     String
+  tags        String   // JSON string array ou virgule-séparé
+
+  article     Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([promptHash])
+}
