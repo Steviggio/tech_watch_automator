@@ -3,23 +3,44 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Search, Filter, Sparkles, Clock, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export type DashboardArticle = {
   id: string;
   title: string;
   source: string;
-  time: string;
+  publishDate: string;
   aiSummary: string;
   tags: string[];
   url: string;
 };
 
+function formatRelativeTime(dateString: string): string {
+  const now = Date.now();
+  const then = new Date(dateString).getTime();
+  const diffMs = Math.abs(now - then);
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMinutes < 1) return "À l'instant";
+  if (diffMinutes < 60) return `Il y a ${diffMinutes}min`;
+  if (diffHours < 24) return `Il y a ${diffHours}h`;
+  if (diffDays === 1) return "Hier";
+  return `Il y a ${diffDays} jours`;
+}
+
 export default function DashboardClient({ initialArticles }: { initialArticles: DashboardArticle[] }) {
   const [selectedFilter, setSelectedFilter] = useState("Tous");
   const filters = ["Tous", "Frontend", "Backend", "IA", "DevOps"];
   
-  // Dans un vrai projet, le filter se ferait via une Server Action ou useSWR
-  const displayedArticles = initialArticles;
+  // Filtrage réel par tags
+  const displayedArticles = selectedFilter === "Tous"
+    ? initialArticles
+    : initialArticles.filter(article =>
+        article.tags.some(tag => tag.toLowerCase() === selectedFilter.toLowerCase())
+      );
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 font-sans selection:bg-zinc-200">
@@ -38,12 +59,13 @@ export default function DashboardClient({ initialArticles }: { initialArticles: 
               <input 
                 type="text" 
                 placeholder="Rechercher un article..." 
+                aria-label="Rechercher un article"
                 className="pl-9 pr-4 py-1.5 bg-zinc-50 border border-zinc-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-shadow w-64"
               />
             </div>
-            <a href="/settings" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
+            <Link href="/settings" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
               Paramètres
-            </a>
+            </Link>
           </div>
         </div>
       </header>
@@ -68,10 +90,10 @@ export default function DashboardClient({ initialArticles }: { initialArticles: 
               L'IA a lu et analysé {displayedArticles.length} articles pour vous aujourd'hui.
             </motion.p>
           </div>
-          <a href="/settings" className="flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors px-4 py-2 rounded-md hover:bg-zinc-50 border border-zinc-200">
+          <Link href="/settings" className="flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors px-4 py-2 rounded-md hover:bg-zinc-50 border border-zinc-200">
             <Filter className="w-4 h-4" />
             Ajuster le Prompt
-          </a>
+          </Link>
         </div>
 
         {/* Filtres Rapides */}
@@ -82,17 +104,21 @@ export default function DashboardClient({ initialArticles }: { initialArticles: 
           className="flex flex-wrap gap-2 mb-10"
         >
           {filters.map((filter) => (
-            <button
+            <Button
               key={filter}
+              variant={selectedFilter === filter ? "default" : "secondary"}
+              size="sm"
+              role="button"
+              aria-pressed={selectedFilter === filter}
               onClick={() => setSelectedFilter(filter)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+              className={`rounded-full ${
                 selectedFilter === filter 
                 ? "bg-zinc-900 text-white shadow-md shadow-zinc-900/10" 
                 : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
               }`}
             >
               {filter}
-            </button>
+            </Button>
           ))}
         </motion.div>
 
@@ -112,7 +138,7 @@ export default function DashboardClient({ initialArticles }: { initialArticles: 
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  {article.time}
+                  {formatRelativeTime(article.publishDate)}
                 </span>
                 <div className="flex items-center gap-2 ml-auto">
                   {article.tags.map(tag => (

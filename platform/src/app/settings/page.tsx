@@ -3,7 +3,7 @@ import { addFeed, deleteFeed, updateUserPrompt } from "../actions";
 import { Sparkles, Trash2, Plus, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export default async function SettingsPage() {
   // Pour la v1 (Mono-utilisateur), on récupère le premier utilisateur
@@ -42,8 +42,9 @@ export default async function SettingsPage() {
             if (user) await updateUserPrompt(user.id, formData);
           }} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">Instructions sur-mesure (Custom Prompt)</label>
+              <label htmlFor="custom-prompt" className="block text-sm font-medium text-zinc-700 mb-2">Instructions sur-mesure (Custom Prompt)</label>
               <textarea 
+                id="custom-prompt"
                 name="prompt"
                 defaultValue={user?.customPromptRefinement || ""}
                 placeholder="Ex: Fais des résumés sous forme de liste à puces, sois sarcastique..."
@@ -66,15 +67,19 @@ export default async function SettingsPage() {
             await addFeed(formData);
           }} className="flex gap-3 mb-8">
             <input 
+              id="feed-url"
               type="url" 
               name="url" 
               required
+              aria-label="URL du flux RSS"
               placeholder="https://example.com/feed.xml" 
               className="flex-1 px-4 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-shadow"
             />
             <input 
+              id="feed-title"
               type="text" 
               name="title" 
+              aria-label="Nom du blog"
               placeholder="Nom du blog (Optionnel)" 
               className="w-48 px-4 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-shadow hidden sm:block"
             />

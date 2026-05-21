@@ -1,7 +1,7 @@
 import DashboardClient from "@/components/DashboardClient";
 import prisma from "@/lib/prisma";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 // Server Component pour la récupération des données
 export default async function Page() {
@@ -30,16 +30,11 @@ export default async function Page() {
       tags = [];
     }
 
-    // Calcul simpliste pour l'affichage du temps (Hier, il y a Xh, etc.)
-    const diffTime = Math.abs(new Date().getTime() - article.publishDate.getTime());
-    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60)); 
-    const timeStr = diffHours > 24 ? `${Math.floor(diffHours/24)} jours` : `Il y a ${diffHours}h`;
-
     return {
       id: article.id,
       title: article.title,
       source: article.feed.title,
-      time: timeStr,
+      publishDate: article.publishDate.toISOString(),
       aiSummary: summary.content,
       tags: tags,
       url: article.url
