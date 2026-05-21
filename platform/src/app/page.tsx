@@ -17,6 +17,7 @@ export default async function Page() {
 
   // Mapper les données Prisma vers notre type Front-end
   const articlesForFront = articlesData.map(article => {
+
     // Si l'IA n'a pas encore résumé, on affiche un texte par défaut
     const summary = article.summaries.length > 0 
       ? article.summaries[0] 

@@ -41,6 +41,9 @@ export default function DashboardClient({ initialArticles }: { initialArticles: 
                 className="pl-9 pr-4 py-1.5 bg-zinc-50 border border-zinc-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-shadow w-64"
               />
             </div>
+            <a href="/settings" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
+              Paramètres
+            </a>
           </div>
         </div>
       </header>
@@ -65,10 +68,10 @@ export default function DashboardClient({ initialArticles }: { initialArticles: 
               L'IA a lu et analysé {displayedArticles.length} articles pour vous aujourd'hui.
             </motion.p>
           </div>
-          <button className="flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors px-4 py-2 rounded-md hover:bg-zinc-50 border border-zinc-200">
+          <a href="/settings" className="flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors px-4 py-2 rounded-md hover:bg-zinc-50 border border-zinc-200">
             <Filter className="w-4 h-4" />
             Ajuster le Prompt
-          </button>
+          </a>
         </div>
 
         {/* Filtres Rapides */}
