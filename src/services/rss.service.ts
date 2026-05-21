@@ -6,6 +6,7 @@ export interface FeedItem {
   link: string;
   isoDate: string;
   snippet: string;
+  categories?: string[];
 }
 
 export class RssService {
