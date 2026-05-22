@@ -8,14 +8,16 @@ datasource db {
 }
 
 model User {
-  id                     String    @id @default(cuid())
+  id                     String    @id @default(uuid())
   email                  String    @unique
   name                   String?
   createdAt              DateTime  @default(now())
   customPromptRefinement String?   // Texte libre pour affiner les résumés
+  aiPreferences          String[]  @default([]) // Préférences pré-définies
+  settingsHash           String?   // Hash des préférences pour faire correspondre aux résumés
+  lastForcedRefresh      DateTime? // Pour la limite de 6h
 
   subscriptions          Subscription[]
-  aiSummaries            AiSummary[]
 }
 
 model SummaryFilter {
@@ -62,16 +64,15 @@ model Article {
 }
 
 model AiSummary {
-  id          String   @id @default(cuid())
-  articleId   String
-  userId      String?  // Optionnel: null si le résumé est partagé par le cache
-  promptHash  String   // Hash pour le cache intelligent
-  content     String
-  tags        String   // JSON string array ou virgule-séparé
+  id           String   @id @default(cuid())
+  articleId    String
+  settingsHash String   // Hash des préférences IA utilisées
+  content      String
+  tags         String   // JSON string array ou virgule-séparé
 
-  article     Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
+  @@unique([articleId, settingsHash])
   @@index([articleId])
-  @@index([promptHash])
+  @@index([settingsHash])
 }

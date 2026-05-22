@@ -73,8 +73,7 @@ async function main() {
   await prisma.aiSummary.create({
     data: {
       articleId: article1.id,
-      userId: user.id,
-      promptHash: 'fake_hash_123',
+      settingsHash: 'fake_hash_123',
       content: '• React 19 est là en RC.\n• Support natif des Server Components.\n• Améliorations de performance massives.',
       tags: JSON.stringify(["Frontend", "React 19"]),
     },

@@ -11,17 +11,12 @@ import crypto from 'crypto';
  * @param customRefinement Texte libre de l'utilisateur
  * @returns Le hash SHA-256 unique
  */
-export function generatePromptHash(
-  articleId: string,
-  basePrompt: string,
+export function generateSettingsHash(
   filterModifiers: string[],
   customRefinement?: string
 ): string {
-  // Concaténation de tous les éléments qui influencent le résultat de l'IA
   const payload = JSON.stringify({
-    articleId,
-    basePrompt,
-    filterModifiers: filterModifiers.sort(), // Trier pour éviter des hashs différents si l'ordre change
+    filterModifiers: filterModifiers.sort(),
     customRefinement: customRefinement?.trim().toLowerCase() || ""
   });
 
