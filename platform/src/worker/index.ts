@@ -3,6 +3,7 @@ import prisma from '../lib/prisma';
 import { RssService } from './rss.service';
 import { FilterService, FilterConfig } from './filter.service';
 import { AiService } from '../services/ai.service';
+import { generateSettingsHash } from '../lib/hash';
 
 const rss = new RssService();
 const filterService = new FilterService();
@@ -13,7 +14,7 @@ let isSyncing = false;
 
 // Configuration globale pour le filtrage
 const GLOBAL_FILTER_CONFIG: FilterConfig = {
-  maxAgeDays: 7,
+  maxAgeDays: 365,
   keywords: [],
   excludeKeywords: ['sponsorisé', 'promotion'],
 };
@@ -58,31 +59,52 @@ async function processFeed(feed: { id: string; title: string; url: string }) {
 
   console.log(`✅ ${feed.title}: ${result.count} nouveaux articles insérés.`);
 
-  // Résumé IA pour les articles sans résumé existant
-  if (result.count > 0) {
-    const newArticles = await prisma.article.findMany({
-      where: {
-        feedId: feed.id,
-        summaries: { none: {} },
-      },
-      take: result.count,
+  // Trouver tous les utilisateurs abonnés à ce flux
+  const subscriptions = await prisma.subscription.findMany({
+    where: { feedId: feed.id },
+    include: { user: true }
+  });
+
+  // Extraire les configurations IA uniques de ces utilisateurs
+  const uniqueSettingsMap = new Map<string, { preferences: string[], customPrompt: string }>();
+  
+  for (const sub of subscriptions) {
+    const user = sub.user;
+    const prefs = user.aiPreferences || [];
+    const custom = user.customPromptRefinement || '';
+    // Utiliser le settingsHash stocké ou le recalculer
+    const hash = user.settingsHash || generateSettingsHash(prefs, custom);
+    if (!uniqueSettingsMap.has(hash)) {
+      uniqueSettingsMap.set(hash, { preferences: prefs, customPrompt: custom });
+    }
+  }
+
+  // Pour chaque article, et pour chaque configuration IA, vérifier si le résumé existe
+  if (result.count > 0 || true) { // On traite aussi les anciens articles s'ils n'ont pas leur résumé
+    // On prend les 20 derniers articles du flux pour éviter de tout recalculer
+    const recentArticles = await prisma.article.findMany({
+      where: { feedId: feed.id },
+      take: 20,
       orderBy: { publishDate: 'desc' },
+      include: { summaries: true }
     });
 
-    for (const article of newArticles) {
-      try {
-        await aiService.summarizeArticle(
-          article.id,
-          article.rawContent,
-          [], // Pas de filtres spécifiques pour le worker
-        );
-        console.log(`🧠 Résumé IA généré pour : ${article.title}`);
-      } catch (aiError) {
-        // Ne pas crasher le worker si l'IA échoue
-        console.error(
-          `⚠️ Erreur IA pour l'article "${article.title}":`,
-          aiError
-        );
+    for (const article of recentArticles) {
+      for (const [hash, settings] of uniqueSettingsMap.entries()) {
+        const hasSummary = article.summaries.some(s => s.settingsHash === hash);
+        if (!hasSummary) {
+          try {
+            await aiService.summarizeArticle(
+              article.id,
+              article.rawContent,
+              settings.preferences,
+              settings.customPrompt
+            );
+            console.log(`🧠 Résumé IA généré pour : ${article.title} (Hash: ${hash.substring(0,6)})`);
+          } catch (aiError) {
+            console.error(`⚠️ Erreur IA pour l'article "${article.title}":`, aiError);
+          }
+        }
       }
     }
   }
