@@ -1,58 +1,63 @@
 # Tech Watch Automator 🚀
 
-Ce projet permet d'automatiser votre veille technologique sans utiliser de plateformes tierces payantes comme Make ou Zapier. Il utilise GitHub Actions pour lancer un script TypeScript à intervalle régulier (Cron Job), qui récupère divers flux RSS et les insère dans une base de données Notion.
+Une plateforme complète et auto-hébergée pour automatiser votre veille technologique. Elle agrège vos flux RSS, les filtre, et génère des résumés personnalisés grâce à l'Intelligence Artificielle (API Mistral), le tout depuis un dashboard moderne sécurisé.
 
-## Fonctionnalités
-- 🆓 **100% Gratuit** : Hébergé sur GitHub Actions.
-- 🔄 **Synchronisation automatique** : S'exécute toutes les 6 heures (configurable).
-- 🧠 **Gestion des doublons** : Vérifie l'URL de l'article dans Notion avant insertion.
-- 🛠️ **TypeScript & ESM** : Code maintenable, typé et moderne (`module: nodenext`).
+## Fonctionnalités 🌟
+- 🤖 **Résumés IA Personnalisés** : Utilisation de l'API Mistral (via Vercel AI SDK) pour synthétiser les articles selon vos préférences (ton, longueur, mots-clés).
+- 🔄 **Worker Asynchrone** : Récupération automatique des flux via des tâches planifiées en arrière-plan (Cron) ou à la demande via l'interface.
+- 🔐 **Authentification Sécurisée** : Connexion gérée par Supabase.
+- 🐳 **Entièrement Dockerisé** : Facile à déployer avec NGINX, Next.js et Node.js.
+- 🎨 **Interface Moderne** : Développée avec Next.js (App Router), Tailwind CSS et des composants UI avancés.
+- 🗄️ **Base de Données PostgreSQL** : Structure gérée via Prisma ORM avec intégration native à Supabase.
 
-## Architecture
-- `src/config/sources.ts` : Liste des flux RSS à surveiller.
-- `src/services/rss.service.ts` : Parseur de flux RSS vers JSON.
-- `src/services/notion.service.ts` : Interaction avec l'API Notion.
-- `.github/workflows/cron-sync.yml` : Workflow d'automatisation GitHub Actions.
+## Architecture Globale 🏗️
+Le projet est packagé dans un monorepo contenant trois conteneurs principaux orchestrés par Docker Compose :
+- **Web (`tech_watch-web`)** : L'interface utilisateur en Next.js.
+- **Worker (`tech_watch-worker`)** : Le script Node.js tournant en boucle pour la récupération RSS.
+- **NGINX (`tech_watch-nginx`)** : Le reverse proxy exposant le port 80.
 
-## Prérequis
-- Un compte [Notion](https://notion.so) et un compte [GitHub](https://github.com).
-- Node.js version 20+.
+## Prérequis 🛠️
+- **Docker** et **Docker Compose**
+- Un compte [Supabase](https://supabase.com) (pour la base de données PostgreSQL et l'Auth)
+- Un compte sur [La Plateforme Mistral](https://console.mistral.ai) (pour la clé API IA gratuite)
 
-## Installation
-1. Clonez ce dépôt.
-2. Installez les dépendances :
+## Installation & Déploiement 🚀
+
+1. **Clonez le projet**
    ```bash
-   npm install
+   git clone <votre_repo>
+   cd tech_watch
    ```
 
-## Configuration (Côté Notion)
-1. Créez une base de données Notion (format Table) avec les colonnes : `Name` (Title), `URL` (URL), `Category` (Select), `Date` (Date), `Status` (Status).
-2. Rendez-vous sur [Notion Developers](https://www.notion.so/my-integrations) pour créer une "Nouvelle intégration".
-3. Récupérez le **Internal Integration Secret** (ce sera votre `NOTION_TOKEN`).
-4. Invitez l'intégration dans votre base de données Notion via le menu `...` > *Connect to* de la page de la base de données.
-5. Copiez l'ID de votre base de données depuis l'URL (suite de 32 caractères). Ce sera votre `NOTION_DATABASE_ID`.
+2. **Configuration des variables d'environnement**
+   Copiez le fichier `platform/.env.example` en `platform/.env` et renseignez les valeurs requises :
+   ```env
+   # Prisma
+   DATABASE_URL="postgres://..."
+   DIRECT_URL="postgres://..."
 
-## Configuration (Côté GitHub)
-1. Allez dans les paramètres de votre dépôt GitHub > **Secrets and variables** > **Actions**.
-2. Créez les secrets suivants :
-   - `NOTION_TOKEN`
-   - `NOTION_DATABASE_ID`
+   # Supabase Auth
+   NEXT_PUBLIC_SUPABASE_URL="https://..."
+   NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJ..."
 
-## Utilisation en local
-Créez un fichier `.env` à la racine avec vos variables :
-```env
-NOTION_TOKEN=secret_...
-NOTION_DATABASE_ID=1a2b3c...
-```
-Lancez la vérification des types :
-```bash
-npm run typecheck
-```
-Lancez le script :
-```bash
-npm start
-```
-Ou en mode développement (rechargement automatique) :
-```bash
-npm run dev
-```
+   # IA
+   MISTRAL_API_KEY="votre_cle_mistral"
+   ```
+
+3. **Lancement via Docker**
+   Construisez et lancez les conteneurs (l'option `--build` est requise la première fois) :
+   ```bash
+   docker-compose up -d --build
+   ```
+
+4. **Accès**
+   Rendez-vous sur [http://localhost](http://localhost) pour accéder à l'application.
+
+## Utilisation 💡
+1. **Création de compte** : Créez un compte via la page d'inscription.
+2. **Configuration IA** : Allez dans "Paramètres IA" pour définir comment vous souhaitez que les articles soient résumés (Ton formel/décontracté, longueur maximale).
+3. **Ajout de sources** : Ajoutez les URLs des flux RSS qui vous intéressent (blogs techniques, actus, etc.).
+4. **Récupération** : Les articles sont scannés en arrière-plan, mais vous pouvez cliquer sur le bouton "Actualiser les Flux" pour forcer la synchronisation immédiatement.
+
+---
+
