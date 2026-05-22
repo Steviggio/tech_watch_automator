@@ -2,12 +2,25 @@ import prisma from "@/lib/prisma";
 import { addFeed, deleteFeed, updateUserPrompt } from "../actions";
 import { Sparkles, Trash2, Plus, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { ForceRefreshButton } from "@/components/ForceRefreshButton";
+
+const AI_PREFERENCES = [
+  { id: "bullet_points", label: "Résumé en liste à puces" },
+  { id: "no_jargon", label: "Vulgarisé (sans jargon technique)" },
+  { id: "technical", label: "Très technique et précis" }
+];
 
 export const revalidate = 60;
 
 export default async function SettingsPage() {
-  // Pour la v1 (Mono-utilisateur), on récupère le premier utilisateur
-  const user = await prisma.user.findFirst();
+  const supabase = await createClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  
+  let user = null;
+  if (authUser) {
+    user = await prisma.user.findUnique({ where: { id: authUser.id } });
+  }
   const feeds = await prisma.feed.findMany();
 
   return (
@@ -39,22 +52,44 @@ export default async function SettingsPage() {
 
           <form action={async (formData) => {
             "use server";
-            if (user) await updateUserPrompt(user.id, formData);
-          }} className="space-y-4">
+            await updateUserPrompt(formData);
+          }} className="space-y-6">
+            
             <div>
-              <label htmlFor="custom-prompt" className="block text-sm font-medium text-zinc-700 mb-2">Instructions sur-mesure (Custom Prompt)</label>
+              <label className="block text-sm font-medium text-zinc-700 mb-3">Préférences rapides</label>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {AI_PREFERENCES.map(pref => (
+                  <label key={pref.id} className="flex items-center gap-2 px-4 py-2 bg-zinc-50 border border-zinc-200 rounded-full cursor-pointer hover:bg-zinc-100 transition-colors has-[:checked]:bg-zinc-900 has-[:checked]:text-white has-[:checked]:border-zinc-900">
+                    <input 
+                      type="checkbox" 
+                      name="preferences" 
+                      value={pref.id} 
+                      defaultChecked={user?.aiPreferences?.includes(pref.id)} 
+                      className="hidden" 
+                    />
+                    <span className="text-sm font-medium">{pref.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="custom-prompt" className="block text-sm font-medium text-zinc-700 mb-2">Instructions sur-mesure (Optionnel)</label>
               <textarea 
                 id="custom-prompt"
                 name="prompt"
                 defaultValue={user?.customPromptRefinement || ""}
-                placeholder="Ex: Fais des résumés sous forme de liste à puces, sois sarcastique..."
+                placeholder="Ex: Sois sarcastique, concentre-toi uniquement sur les frameworks JS..."
                 className="w-full h-32 p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-shadow resize-none"
               />
             </div>
+            
             <button type="submit" className="px-6 py-2.5 bg-zinc-900 text-white rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors">
-              Sauvegarder les instructions
+              Sauvegarder les préférences
             </button>
           </form>
+
+          <ForceRefreshButton lastRefresh={user?.lastForcedRefresh || null} />
         </section>
 
         {/* Section: Flux RSS */}

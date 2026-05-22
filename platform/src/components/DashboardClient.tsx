@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Search, Filter, Sparkles, Clock, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { logout } from "@/app/login/actions";
 
 export type DashboardArticle = {
   id: string;
@@ -31,7 +32,7 @@ function formatRelativeTime(dateString: string): string {
   return `Il y a ${diffDays} jours`;
 }
 
-export default function DashboardClient({ initialArticles }: { initialArticles: DashboardArticle[] }) {
+export default function DashboardClient({ initialArticles, user }: { initialArticles: DashboardArticle[], user: any }) {
   const [selectedFilter, setSelectedFilter] = useState("Tous");
   const filters = ["Tous", "Frontend", "Backend", "IA", "DevOps"];
   
@@ -63,9 +64,22 @@ export default function DashboardClient({ initialArticles }: { initialArticles: 
                 className="pl-9 pr-4 py-1.5 bg-zinc-50 border border-zinc-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-shadow w-64"
               />
             </div>
-            <Link href="/settings" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
-              Paramètres
-            </Link>
+            {user ? (
+              <>
+                <Link href="/settings" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
+                  Paramètres
+                </Link>
+                <form action={logout}>
+                  <button type="submit" className="text-sm font-medium text-zinc-500 hover:text-red-600 transition-colors">
+                    Déconnexion
+                  </button>
+                </form>
+              </>
+            ) : (
+              <Link href="/login" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
+                Connexion
+              </Link>
+            )}
           </div>
         </div>
       </header>

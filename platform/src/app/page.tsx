@@ -1,16 +1,36 @@
 import DashboardClient from "@/components/DashboardClient";
 import prisma from "@/lib/prisma";
+import { generateSettingsHash } from "@/lib/hash";
+
+import { createClient } from "@/lib/supabase/server";
 
 export const revalidate = 60;
 
 // Server Component pour la récupération des données
 export default async function Page() {
-  // Récupérer les articles avec leur feed et leurs résumés IA
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let dbUser = null;
+  let settingsHash = "";
+  
+  if (user) {
+    dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+    if (dbUser) {
+      const prefs = dbUser.aiPreferences || [];
+      const custom = dbUser.customPromptRefinement || "";
+      settingsHash = dbUser.settingsHash || generateSettingsHash(prefs, custom);
+    }
+  }
+
+  // Récupérer les articles avec leur feed et leurs résumés IA correspondants
   const articlesData = await prisma.article.findMany({
     orderBy: { publishDate: 'desc' },
     include: {
       feed: true,
-      summaries: true, // On prend les résumés générés
+      summaries: {
+        where: settingsHash ? { settingsHash } : undefined
+      },
     },
     take: 10
   });
@@ -41,5 +61,5 @@ export default async function Page() {
     };
   });
 
-  return <DashboardClient initialArticles={articlesForFront} />;
+  return <DashboardClient initialArticles={articlesForFront} user={user} />;
 }
