@@ -1,7 +1,7 @@
-import { generateText } from 'ai';
-import { google } from '@ai-sdk/google';
-import { generatePromptHash } from '../lib/hash';
-import prisma from '../lib/prisma';
+import { generateText } from "ai";
+import { mistral } from "@ai-sdk/mistral";
+import { generateSettingsHash } from "../lib/hash";
+import prisma from "../lib/prisma";
 
 export class AiService {
   private basePrompt = `
@@ -13,11 +13,14 @@ export class AiService {
   /**
    * Construit le prompt dynamique en fonction des filtres de l'utilisateur
    */
-  private buildDynamicPrompt(filterModifiers: string[], customRefinement?: string): string {
+  private buildDynamicPrompt(
+    filterModifiers: string[],
+    customRefinement?: string,
+  ): string {
     let finalPrompt = this.basePrompt;
 
     if (filterModifiers.length > 0) {
-      finalPrompt += `\n\nCONTRAINTES SPÉCIFIQUES :\n${filterModifiers.join('\n')}`;
+      finalPrompt += `\n\nCONTRAINTES SPÉCIFIQUES :\n${filterModifiers.join("\n")}`;
     }
 
     if (customRefinement) {
@@ -34,19 +37,55 @@ export class AiService {
   private extractTags(text: string): string {
     // Extraire les mots significatifs (> 4 chars), dédupliquer, garder les 5 premiers
     const stopWords = new Set([
-      'cette', 'entre', 'leurs', 'comme', 'après', 'avant', 'aussi',
-      'autre', 'autres', 'avoir', 'dans', 'depuis', 'être', 'encore',
-      'faire', 'leurs', 'même', 'notre', 'nous', 'plus', 'pour',
-      'quel', 'sans', 'sont', 'sous', 'tout', 'tous', 'très',
-      'votre', 'vous', 'avec', 'which', 'their', 'about', 'would',
-      'there', 'these', 'could', 'other', 'where', 'those', 'should',
+      "cette",
+      "entre",
+      "leurs",
+      "comme",
+      "après",
+      "avant",
+      "aussi",
+      "autre",
+      "autres",
+      "avoir",
+      "dans",
+      "depuis",
+      "être",
+      "encore",
+      "faire",
+      "leurs",
+      "même",
+      "notre",
+      "nous",
+      "plus",
+      "pour",
+      "quel",
+      "sans",
+      "sont",
+      "sous",
+      "tout",
+      "tous",
+      "très",
+      "votre",
+      "vous",
+      "avec",
+      "which",
+      "their",
+      "about",
+      "would",
+      "there",
+      "these",
+      "could",
+      "other",
+      "where",
+      "those",
+      "should",
     ]);
 
     const words = text
       .toLowerCase()
-      .replace(/[^a-zà-ÿ0-9\s-]/gi, ' ')
+      .replace(/[^a-zà-ÿ0-9\s-]/gi, " ")
       .split(/\s+/)
-      .filter(w => w.length > 4 && !stopWords.has(w));
+      .filter((w) => w.length > 4 && !stopWords.has(w));
 
     // Compter les occurrences
     const freq = new Map<string, number>();
@@ -67,30 +106,44 @@ export class AiService {
    * Fonction principale pour résumer un article avec gestion du cache
    */
   async summarizeArticle(
-    articleId: string, 
-    articleContent: string, 
-    filterModifiers: string[], 
-    customRefinement?: string
+    articleId: string,
+    articleContent: string,
+    filterModifiers: string[],
+    customRefinement?: string,
   ) {
-    const promptHash = generatePromptHash(articleId, this.basePrompt, filterModifiers, customRefinement);
+    const settingsHash = generateSettingsHash(
+      filterModifiers,
+      customRefinement,
+    );
 
     // 1. VÉRIFICATION DU CACHE EN BASE DE DONNÉES
-    const cachedSummary = await prisma.aiSummary.findFirst({
-      where: { promptHash }
+    const cachedSummary = await prisma.aiSummary.findUnique({
+      where: { articleId_settingsHash: { articleId, settingsHash } },
     });
 
     if (cachedSummary) {
       console.log("🚀 Cache Hit! Retour du résumé existant.");
-      return { content: cachedSummary.content, tags: cachedSummary.tags, cached: true };
+      return {
+        content: cachedSummary.content,
+        tags: cachedSummary.tags,
+        cached: true,
+      };
     }
 
     // 2. CONSTRUCTION DU PROMPT DYNAMIQUE
-    const systemPrompt = this.buildDynamicPrompt(filterModifiers, customRefinement);
+    const systemPrompt = this.buildDynamicPrompt(
+      filterModifiers,
+      customRefinement,
+    );
 
-    // 3. APPEL À L'API GEMINI 1.5 FLASH VIA VERCEL AI SDK
-    console.log("🧠 Génération d'un nouveau résumé via l'IA...");
+    // 3. APPEL À L'API MISTRAL VIA VERCEL AI SDK
+    // On force un délai de 1 seconde avant l'appel pour ne pas dépasser le quota gratuit (1 req/sec)
+    console.log("⏳ Pause de 1s pour respecter le quota Mistral Free Tier...");
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    console.log("🧠 Génération d'un nouveau résumé via l'IA (Mistral)...");
     const { text } = await generateText({
-      model: google('gemini-1.5-flash'),
+      model: mistral("mistral-small-latest"),
       system: systemPrompt,
       prompt: `Voici l'article à résumer :\n\n${articleContent}`,
     });
@@ -101,10 +154,10 @@ export class AiService {
     await prisma.aiSummary.create({
       data: {
         articleId,
-        promptHash,
+        settingsHash,
         content: text,
         tags,
-      }
+      },
     });
 
     return { content: text, tags, cached: false };
