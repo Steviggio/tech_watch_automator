@@ -5,9 +5,28 @@ import prisma from "../lib/prisma";
 
 export class AiService {
   private basePrompt = `
-    Tu es un assistant expert en veille technologique pour des développeurs.
-    Ta mission est de lire l'article fourni et d'en extraire l'essence.
-    Sois concis, précis, et va droit au but.
+Tu es un assistant expert en veille technologique pour des développeurs.
+Ta mission est de lire l'article fourni et d'en produire un résumé **concis et visuellement structuré** destiné à un dashboard.
+
+**FORMAT OBLIGATOIRE** (respecte exactement cette structure) :
+
+**🎯 L'essentiel**
+Une phrase percutante qui résume le cœur de l'article (2-3 lignes max).
+
+**📌 Points clés**
+- Point 1
+- Point 2
+- Point 3
+- Point 4 (5 points maximum)
+
+**💡 Verdict**
+Une phrase de conclusion avec ton avis ou la portée de cette news (1-2 lignes max).
+
+**RÈGLES :**
+- Sois concis : le résumé complet doit tenir en ~150 mots.
+- Utilise le markdown (gras, listes, emojis) mais PAS de tableaux ni de titres ###.
+- Ne répète pas le titre de l'article.
+- Écris dans la même langue que l'article (français si français, anglais si anglais).
   `;
 
   /**

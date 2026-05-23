@@ -128,3 +128,105 @@
     @apply font-sans;
   }
 }
+
+/* ── Styles for AI Summary Markdown Rendering ──────────────────────────── */
+.prose-summary {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: #52525b; /* zinc-600 */
+}
+
+.prose-summary p {
+  margin-bottom: 0.5rem;
+}
+
+.prose-summary strong {
+  color: #18181b; /* zinc-900 */
+  font-weight: 600;
+}
+
+.prose-summary ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.5rem 0;
+}
+
+.prose-summary ul li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.prose-summary ul li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3f3f46, #a1a1aa);
+}
+
+.prose-summary hr {
+  border: none;
+  height: 1px;
+  background: #e4e4e7; /* zinc-200 */
+  margin: 0.75rem 0;
+}
+
+.prose-summary table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.8rem;
+}
+
+.prose-summary th {
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  background: #f4f4f5; /* zinc-100 */
+  border-bottom: 2px solid #e4e4e7;
+  color: #18181b;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.prose-summary td {
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid #f4f4f5;
+}
+
+.prose-summary tr:hover td {
+  background: #fafafa;
+}
+
+.prose-summary code {
+  background: #f4f4f5;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.8em;
+  color: #3f3f46;
+}
+
+.prose-summary blockquote {
+  border-left: 3px solid #d4d4d8;
+  padding-left: 0.75rem;
+  margin: 0.5rem 0;
+  color: #71717a;
+  font-style: italic;
+}
+
+.prose-summary a {
+  color: #18181b;
+  text-decoration: underline;
+  text-decoration-color: #d4d4d8;
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.2s;
+}
+
+.prose-summary a:hover {
+  text-decoration-color: #18181b;
+}
