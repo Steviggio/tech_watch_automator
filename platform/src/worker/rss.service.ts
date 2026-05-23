@@ -18,8 +18,6 @@ export class RssService {
 
   constructor() {
     this.parser = new Parser({
-      timeout: 10_000,
-      headers: { 'User-Agent': BROWSER_UA },
       customFields: {
         item: [
           ["content:encoded", "contentEncoded"],
@@ -31,6 +29,30 @@ export class RssService {
   }
 
   /**
+   * Télécharge le contenu d'une URL avec un User-Agent navigateur
+   * puis tente de parser le XML via parseString.
+   */
+  private async fetchAndParseRss(url: string): Promise<FeedItem[]> {
+    const response = await fetch(url, {
+      headers: { 'User-Agent': BROWSER_UA },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
+    
+    const xml = await response.text();
+    const feed = await this.parser.parseString(xml);
+    
+    return feed.items.map((item: any) => ({
+      title: item.title || "Sans titre",
+      link: item.link || "",
+      pubDate: item.pubDate || item.isoDate,
+      contentSnippet: item.contentSnippet,
+      content: item.contentEncoded || item.content,
+      categories: Array.isArray(item.categories) ? item.categories : [],
+    }));
+  }
+
+  /**
    * @param url     L'URL du flux ou de la page à analyser
    * @param depth   Garde anti-boucle : on ne suit qu'un seul niveau de redirection RSS
    */
@@ -38,20 +60,12 @@ export class RssService {
     let items: FeedItem[] = [];
 
     try {
-      // 1. Tenter de parser comme un flux RSS standard
-      const feed = await this.parser.parseURL(url);
-      items = feed.items.map((item: any) => ({
-        title: item.title || "Sans titre",
-        link: item.link || "",
-        pubDate: item.pubDate,
-        contentSnippet: item.contentSnippet,
-        content: item.contentEncoded || item.content,
-        categories: Array.isArray(item.categories) ? item.categories : [],
-      }));
+      // 1. Télécharger le XML nous-mêmes et parser localement
+      items = await this.fetchAndParseRss(url);
     } catch (error) {
       // Garde anti-boucle : on ne tente le scraping qu'au premier niveau
       if (depth > 0) {
-        console.error(`[RssService] Échec du parsing RSS après redirection, abandon: ${url}`);
+        console.error(`[RssService] Échec du parsing RSS après redirection, abandon: ${url}`, (error as Error).message);
         return [];
       }
 
@@ -60,7 +74,7 @@ export class RssService {
       
       if (scraperResult.type === 'rss' && scraperResult.url) {
         console.log(`[RssService] Flux RSS alternatif trouvé: ${scraperResult.url}`);
-        return this.fetchFeed(scraperResult.url, depth + 1); // Un seul niveau de récursion max
+        return this.fetchFeed(scraperResult.url, depth + 1);
       } else if (scraperResult.items) {
         items = scraperResult.items;
       }
@@ -86,3 +100,4 @@ export class RssService {
     return topItems;
   }
 }
+
