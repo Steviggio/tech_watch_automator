@@ -19,7 +19,8 @@ export class ScraperService {
   async extractArticleContent(url: string): Promise<string | null> {
     try {
       const response = await fetch(url, { 
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } 
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+        signal: AbortSignal.timeout(10000)
       });
       if (!response.ok) return null;
       
@@ -42,8 +43,19 @@ export class ScraperService {
    */
   async findRssOrLinks(url: string): Promise<ScraperResult> {
     try {
+      // 0. Heuristiques spécifiques pour les sites connus (ex: Reddit)
+      try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname.includes('reddit.com') && urlObj.pathname.startsWith('/r/') && !urlObj.pathname.endsWith('.rss')) {
+          // Reddit fournit nativement du RSS en ajoutant .rss à l'URL du subreddit
+          const rssUrl = urlObj.origin + urlObj.pathname.replace(/\/$/, '') + '/.rss' + urlObj.search;
+          return { type: 'rss', url: rssUrl };
+        }
+      } catch(e) {}
+
       const response = await fetch(url, { 
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } 
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' },
+        signal: AbortSignal.timeout(10000)
       });
       if (!response.ok) throw new Error(`Status ${response.status}`);
       
