@@ -214,7 +214,7 @@ export async function forceRefreshSummaries() {
       const filterService = new FilterService();
       const aiService = new AiService();
 
-      const filterConfig = { maxAgeDays: 365, keywords: [], excludeKeywords: ['sponsorisé', 'promotion'] };
+      const filterConfig = { maxAgeDays: 30, keywords: [], excludeKeywords: ['sponsorisé', 'promotion'] };
 
       // 1. Fetch & Insert new articles for all user's subscriptions
       for (const sub of dbUser.subscriptions) {

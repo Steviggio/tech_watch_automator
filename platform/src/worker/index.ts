@@ -14,7 +14,7 @@ let isSyncing = false;
 
 // Configuration globale pour le filtrage
 const GLOBAL_FILTER_CONFIG: FilterConfig = {
-  maxAgeDays: 365,
+  maxAgeDays: 30,
   keywords: [],
   excludeKeywords: ['sponsorisé', 'promotion'],
 };
