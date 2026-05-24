@@ -90,7 +90,9 @@ function ArticleCard({
         {/* Toggle header */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="w-full flex items-center gap-2.5 px-5 py-3 text-left hover:bg-zinc-50/80 transition-colors"
+          aria-expanded={expanded}
+          aria-controls={`summary-content-${article.id}`}
+          className="w-full flex items-center gap-2.5 px-5 py-3 text-left hover:bg-zinc-50/80 transition-colors cursor-pointer"
         >
           <Sparkles className="w-4 h-4 text-zinc-400 shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
@@ -105,6 +107,7 @@ function ArticleCard({
         <AnimatePresence initial={false}>
           {expanded && (
             <motion.div
+              id={`summary-content-${article.id}`}
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -122,15 +125,16 @@ function ArticleCard({
 
         {/* Collapsed preview */}
         {!expanded && (
-          <div 
+          <button
+            type="button"
             onClick={() => setExpanded(true)}
-            className="px-5 pb-3 cursor-pointer group/preview"
+            className="w-full text-left px-5 pb-3 cursor-pointer group/preview focus:outline-none focus:ring-2 focus:ring-zinc-400 rounded-b-xl"
           >
             <p className="text-sm text-zinc-500 line-clamp-2 group-hover/preview:text-zinc-700 transition-colors">
               {article.aiSummary.replace(/[*#_\[\]`>-]/g, "").substring(0, 200)}
               ...
             </p>
-          </div>
+          </button>
         )}
       </div>
 
