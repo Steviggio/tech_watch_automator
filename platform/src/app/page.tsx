@@ -32,7 +32,6 @@ export default async function Page() {
         where: settingsHash ? { settingsHash } : undefined
       },
     },
-    take: 10
   });
 
   // Mapper les données Prisma vers notre type Front-end

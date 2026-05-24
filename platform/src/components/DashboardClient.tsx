@@ -2,7 +2,14 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { Search, Filter, Sparkles, Clock, ChevronRight, ChevronDown } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Sparkles,
+  Clock,
+  ChevronRight,
+  ChevronDown,
+} from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -34,14 +41,20 @@ function formatRelativeTime(dateString: string): string {
   return `Il y a ${diffDays} jours`;
 }
 
-function ArticleCard({ article, idx }: { article: DashboardArticle; idx: number }) {
+function ArticleCard({
+  article,
+  idx,
+}: {
+  article: DashboardArticle;
+  idx: number;
+}) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <motion.article 
+    <motion.article
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 + (idx * 0.05) }}
+      transition={{ delay: 0.3 + idx * 0.05 }}
       className="group p-6 rounded-2xl border border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-100 transition-all duration-300"
     >
       {/* Meta: source, date, tags */}
@@ -54,31 +67,38 @@ function ArticleCard({ article, idx }: { article: DashboardArticle; idx: number 
           {formatRelativeTime(article.publishDate)}
         </span>
         <div className="flex items-center gap-2 ml-auto">
-          {article.tags.map(tag => (
-            <span key={tag} className="px-2 py-0.5 bg-zinc-50 border border-zinc-100 rounded-full text-zinc-400 text-[10px] uppercase tracking-wider">
+          {article.tags.map((tag) => (
+            <span
+              key={tag}
+              className="px-2 py-0.5 bg-zinc-50 border border-zinc-100 rounded-full text-zinc-400 text-[10px] uppercase tracking-wider"
+            >
               {tag}
             </span>
           ))}
         </div>
       </div>
-      
+
       {/* Title */}
       <h3 className="text-xl font-semibold mb-3 text-zinc-900 group-hover:text-zinc-700 transition-colors">
         {article.title}
       </h3>
-      
+
       {/* AI Summary - Expandable Card */}
-      <div className="bg-gradient-to-br from-zinc-50 to-white rounded-xl border border-zinc-100 relative overflow-hidden">
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-zinc-800 to-zinc-300"></div>
-        
+      <div className="bg-linear-to-br from-zinc-50 to-white rounded-xl border border-zinc-100 relative overflow-hidden">
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-zinc-800 to-zinc-300"></div>
+
         {/* Toggle header */}
-        <button 
+        <button
           onClick={() => setExpanded(!expanded)}
           className="w-full flex items-center gap-2.5 px-5 py-3 text-left hover:bg-zinc-50/80 transition-colors"
         >
           <Sparkles className="w-4 h-4 text-zinc-400 shrink-0" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Résumé IA</span>
-          <ChevronDown className={`w-4 h-4 text-zinc-400 ml-auto transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+            Résumé IA
+          </span>
+          <ChevronDown
+            className={`w-4 h-4 text-zinc-400 ml-auto transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+          />
         </button>
 
         {/* Content */}
@@ -102,9 +122,13 @@ function ArticleCard({ article, idx }: { article: DashboardArticle; idx: number 
 
         {/* Collapsed preview */}
         {!expanded && (
-          <div className="px-5 pb-3">
-            <p className="text-sm text-zinc-500 line-clamp-2">
-              {article.aiSummary.replace(/[*#_\[\]`>-]/g, '').substring(0, 200)}...
+          <div 
+            onClick={() => setExpanded(true)}
+            className="px-5 pb-3 cursor-pointer group/preview"
+          >
+            <p className="text-sm text-zinc-500 line-clamp-2 group-hover/preview:text-zinc-700 transition-colors">
+              {article.aiSummary.replace(/[*#_\[\]`>-]/g, "").substring(0, 200)}
+              ...
             </p>
           </div>
         )}
@@ -112,9 +136,9 @@ function ArticleCard({ article, idx }: { article: DashboardArticle; idx: number 
 
       {/* Link to original */}
       <div className="mt-4 flex justify-end">
-        <a 
-          href={article.url} 
-          target="_blank" 
+        <a
+          href={article.url}
+          target="_blank"
           rel="noreferrer"
           className="flex items-center gap-1 text-sm font-medium text-zinc-400 group-hover:text-zinc-900 transition-colors"
         >
@@ -126,16 +150,25 @@ function ArticleCard({ article, idx }: { article: DashboardArticle; idx: number 
   );
 }
 
-export default function DashboardClient({ initialArticles, user }: { initialArticles: DashboardArticle[], user: any }) {
+export default function DashboardClient({
+  initialArticles,
+  user,
+}: {
+  initialArticles: DashboardArticle[];
+  user: any;
+}) {
   const [selectedFilter, setSelectedFilter] = useState("Tous");
   const filters = ["Tous", "Frontend", "Backend", "IA", "DevOps"];
-  
+
   // Filtrage réel par tags
-  const displayedArticles = selectedFilter === "Tous"
-    ? initialArticles
-    : initialArticles.filter(article =>
-        article.tags.some(tag => tag.toLowerCase() === selectedFilter.toLowerCase())
-      );
+  const displayedArticles =
+    selectedFilter === "Tous"
+      ? initialArticles
+      : initialArticles.filter((article) =>
+          article.tags.some(
+            (tag) => tag.toLowerCase() === selectedFilter.toLowerCase(),
+          ),
+        );
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 font-sans selection:bg-zinc-200">
@@ -146,31 +179,42 @@ export default function DashboardClient({ initialArticles, user }: { initialArti
             <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <h1 className="font-semibold tracking-tight text-lg">TechWatch AI</h1>
+            <h1 className="font-semibold tracking-tight text-lg">
+              TechWatch AI
+            </h1>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-              <input 
-                type="text" 
-                placeholder="Rechercher un article..." 
+              <input
+                type="text"
+                placeholder="Rechercher un article..."
                 aria-label="Rechercher un article"
                 className="pl-9 pr-4 py-1.5 bg-zinc-50 border border-zinc-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-shadow w-64"
               />
             </div>
             {user ? (
               <>
-                <Link href="/settings" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
+                <Link
+                  href="/settings"
+                  className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+                >
                   Paramètres
                 </Link>
                 <form action={logout}>
-                  <button type="submit" className="text-sm font-medium text-zinc-500 hover:text-red-600 transition-colors">
+                  <button
+                    type="submit"
+                    className="text-sm font-medium text-zinc-500 hover:text-red-600 transition-colors"
+                  >
                     Déconnexion
                   </button>
                 </form>
               </>
             ) : (
-              <Link href="/login" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
+              <Link
+                href="/login"
+                className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+              >
                 Connexion
               </Link>
             )}
@@ -182,30 +226,34 @@ export default function DashboardClient({ initialArticles, user }: { initialArti
         {/* Titre et Paramètres */}
         <div className="flex items-end justify-between mb-12">
           <div>
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-3xl font-bold tracking-tight text-zinc-900 mb-2"
             >
               Votre veille, <span className="text-zinc-500">résumée.</span>
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="text-zinc-500"
             >
-              L'IA a lu et analysé {displayedArticles.length} articles pour vous aujourd'hui.
+              L'IA a lu et analysé {displayedArticles.length} articles pour vous
+              aujourd'hui.
             </motion.p>
           </div>
-          <Link href="/settings" className="flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors px-4 py-2 rounded-md hover:bg-zinc-50 border border-zinc-200">
+          <Link
+            href="/settings"
+            className="flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors px-4 py-2 rounded-md hover:bg-zinc-50 border border-zinc-200"
+          >
             <Filter className="w-4 h-4" />
             Ajuster le Prompt
           </Link>
         </div>
 
         {/* Filtres Rapides */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -220,9 +268,9 @@ export default function DashboardClient({ initialArticles, user }: { initialArti
               aria-pressed={selectedFilter === filter}
               onClick={() => setSelectedFilter(filter)}
               className={`rounded-full ${
-                selectedFilter === filter 
-                ? "bg-zinc-900 text-white shadow-md shadow-zinc-900/10" 
-                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                selectedFilter === filter
+                  ? "bg-zinc-900 text-white shadow-md shadow-zinc-900/10"
+                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
               }`}
             >
               {filter}
