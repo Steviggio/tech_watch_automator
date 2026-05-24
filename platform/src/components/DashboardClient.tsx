@@ -11,10 +11,14 @@ import {
   ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
+import dynamic from "next/dynamic";
 import remarkGfm from "remark-gfm";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/login/actions";
+import { useSearchParams, useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+const ReactMarkdown = dynamic(() => import("react-markdown"), { ssr: false });
 
 export type DashboardArticle = {
   id: string;
@@ -156,13 +160,26 @@ function ArticleCard({
 
 export default function DashboardClient({
   initialArticles,
-  user,
+  isLoggedIn,
 }: {
   initialArticles: DashboardArticle[];
-  user: any;
+  isLoggedIn: boolean;
 }) {
-  const [selectedFilter, setSelectedFilter] = useState("Tous");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const selectedFilter = searchParams.get("tag") || "Tous";
   const filters = ["Tous", "Frontend", "Backend", "IA", "DevOps"];
+
+  const handleFilter = (filter: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (filter === "Tous") {
+      params.delete("tag");
+    } else {
+      params.set("tag", filter);
+    }
+    router.push(`/?${params.toString()}`);
+  };
 
   // Filtrage réel par tags
   const displayedArticles =
@@ -197,7 +214,7 @@ export default function DashboardClient({
                 className="pl-9 pr-4 py-1.5 bg-zinc-50 border border-zinc-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-shadow w-64"
               />
             </div>
-            {user ? (
+            {isLoggedIn ? (
               <>
                 <Link
                   href="/settings"
@@ -270,12 +287,13 @@ export default function DashboardClient({
               size="sm"
               role="button"
               aria-pressed={selectedFilter === filter}
-              onClick={() => setSelectedFilter(filter)}
-              className={`rounded-full ${
+              onClick={() => handleFilter(filter)}
+              className={cn(
+                "rounded-full transition-all",
                 selectedFilter === filter
                   ? "bg-zinc-900 text-white shadow-md shadow-zinc-900/10"
                   : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-              }`}
+              )}
             >
               {filter}
             </Button>

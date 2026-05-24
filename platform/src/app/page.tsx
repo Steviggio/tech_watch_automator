@@ -1,10 +1,9 @@
+import { Suspense } from "react";
 import DashboardClient from "@/components/DashboardClient";
 import prisma from "@/lib/prisma";
 import { generateSettingsHash } from "@/lib/hash";
 
 import { createClient } from "@/lib/supabase/server";
-
-export const revalidate = 60;
 
 // Server Component pour la récupération des données
 export default async function Page() {
@@ -60,5 +59,9 @@ export default async function Page() {
     };
   });
 
-  return <DashboardClient initialArticles={articlesForFront} user={user} />;
+  return (
+    <Suspense fallback={<div>Chargement...</div>}>
+      <DashboardClient initialArticles={articlesForFront} isLoggedIn={!!user} />
+    </Suspense>
+  );
 }
