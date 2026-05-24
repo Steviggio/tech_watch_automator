@@ -50,7 +50,10 @@ export default async function SettingsPage() {
             </div>
           </div>
 
-          <form action={updateUserPrompt} className="space-y-6">
+          <form action={async (formData) => {
+            "use server";
+            await updateUserPrompt(formData);
+          }} className="space-y-6">
             
             <div>
               <label className="block text-sm font-medium text-zinc-700 mb-3">Préférences rapides</label>
@@ -94,7 +97,10 @@ export default async function SettingsPage() {
           <h2 className="text-xl font-bold tracking-tight mb-2">Sources d'Information (RSS)</h2>
           <p className="text-sm text-zinc-500 mb-6">Gérez les blogs et sites que l'IA doit surveiller pour vous.</p>
 
-          <form action={addFeed} className="flex gap-3 mb-8">
+          <form action={async (formData) => {
+            "use server";
+            await addFeed(formData);
+          }} className="flex gap-3 mb-8">
             <input 
               id="feed-url"
               type="url" 
@@ -130,7 +136,10 @@ export default async function SettingsPage() {
                       {feed.url}
                     </a>
                   </div>
-                  <form action={deleteFeed.bind(null, feed.id)}>
+                  <form action={async () => {
+                    "use server";
+                    await deleteFeed(feed.id);
+                  }}>
                     <button type="submit" className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
