@@ -9,6 +9,7 @@ import {
   Clock,
   ChevronRight,
   ChevronDown,
+  Leaf,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -59,14 +60,20 @@ function ArticleCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 + idx * 0.05 }}
-      className="group p-6 rounded-2xl border border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-100 transition-all duration-300"
+      className="group relative p-6 rounded-2xl border border-earth-200 bg-white/80 backdrop-blur-sm hover:border-forest-300/50 hover:shadow-xl hover:shadow-forest-900/5 transition-all duration-300"
+      style={{
+        boxShadow: '0 1px 3px oklch(0.52 0.07 60 / 0.06), 0 4px 12px oklch(0.52 0.07 60 / 0.03)',
+      }}
     >
+      {/* Subtle top accent line */}
+      <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-forest-300/40 to-transparent" />
+
       {/* Meta: source, date, tags */}
-      <div className="flex items-center gap-3 text-xs font-medium text-zinc-500 mb-3">
-        <span className="flex items-center gap-1.5 px-2 py-1 bg-zinc-100 rounded-md text-zinc-700">
+      <div className="flex items-center gap-3 text-xs font-medium text-earth-500 mb-3">
+        <span className="flex items-center gap-1.5 px-2.5 py-1 bg-forest-50 border border-forest-200/60 rounded-lg text-forest-700 shadow-sm shadow-forest-900/5">
           {article.source}
         </span>
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-1 text-earth-400">
           <Clock className="w-3 h-3" />
           {formatRelativeTime(article.publishDate)}
         </span>
@@ -74,7 +81,7 @@ function ArticleCard({
           {article.tags.map((tag) => (
             <span
               key={tag}
-              className="px-2 py-0.5 bg-zinc-50 border border-zinc-100 rounded-full text-zinc-400 text-[10px] uppercase tracking-wider"
+              className="px-2.5 py-0.5 bg-earth-50 border border-earth-200/60 rounded-full text-earth-500 text-[10px] uppercase tracking-wider shadow-sm"
             >
               {tag}
             </span>
@@ -83,27 +90,27 @@ function ArticleCard({
       </div>
 
       {/* Title */}
-      <h3 className="text-xl font-semibold mb-3 text-zinc-900 group-hover:text-zinc-700 transition-colors">
+      <h3 className="text-xl font-semibold mb-3 text-earth-900 group-hover:text-forest-700 transition-colors">
         {article.title}
       </h3>
 
       {/* AI Summary - Expandable Card */}
-      <div className="bg-linear-to-br from-zinc-50 to-white rounded-xl border border-zinc-100 relative overflow-hidden">
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-zinc-800 to-zinc-300"></div>
+      <div className="bg-gradient-to-br from-forest-50/80 via-earth-50/50 to-white rounded-xl border border-forest-200/40 relative overflow-hidden shadow-inner shadow-forest-900/3">
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-forest-600 via-forest-400 to-earth-300 rounded-l-xl"></div>
 
         {/* Toggle header */}
         <button
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
           aria-controls={`summary-content-${article.id}`}
-          className="w-full flex items-center gap-2.5 px-5 py-3 text-left hover:bg-zinc-50/80 transition-colors cursor-pointer"
+          className="w-full flex items-center gap-2.5 px-5 py-3 text-left hover:bg-forest-50/60 transition-colors cursor-pointer"
         >
-          <Sparkles className="w-4 h-4 text-zinc-400 shrink-0" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+          <Sparkles className="w-4 h-4 text-forest-500 shrink-0" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-forest-600">
             Résumé IA
           </span>
           <ChevronDown
-            className={`w-4 h-4 text-zinc-400 ml-auto transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            className={`w-4 h-4 text-forest-400 ml-auto transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
           />
         </button>
 
@@ -132,9 +139,9 @@ function ArticleCard({
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            className="w-full text-left px-5 pb-3 cursor-pointer group/preview focus:outline-none focus:ring-2 focus:ring-zinc-400 rounded-b-xl"
+            className="w-full text-left px-5 pb-3 cursor-pointer group/preview focus:outline-none focus:ring-2 focus:ring-forest-400 rounded-b-xl"
           >
-            <p className="text-sm text-zinc-500 line-clamp-2 group-hover/preview:text-zinc-700 transition-colors">
+            <p className="text-sm text-earth-500 line-clamp-2 group-hover/preview:text-earth-700 transition-colors">
               {article.aiSummary.replace(/[*#_\[\]`>-]/g, "").substring(0, 200)}
               ...
             </p>
@@ -148,10 +155,10 @@ function ArticleCard({
           href={article.url}
           target="_blank"
           rel="noreferrer"
-          className="flex items-center gap-1 text-sm font-medium text-zinc-400 group-hover:text-zinc-900 transition-colors"
+          className="flex items-center gap-1 text-sm font-medium text-earth-400 group-hover:text-forest-700 transition-colors"
         >
           Lire l&apos;article original
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
         </a>
       </div>
     </motion.article>
@@ -192,40 +199,44 @@ export default function DashboardClient({
         );
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 font-sans selection:bg-zinc-200">
-      {/* Header Minimaliste */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-100">
+    <div className="min-h-screen bg-gradient-to-b from-earth-50 via-white to-forest-50/30 text-earth-900 font-sans selection:bg-forest-200/50">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-earth-200/60"
+        style={{
+          boxShadow: '0 1px 8px oklch(0.52 0.07 60 / 0.06)',
+        }}
+      >
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-gradient-to-br from-forest-700 to-forest-900 rounded-lg flex items-center justify-center shadow-md shadow-forest-900/20">
+              <Leaf className="w-4 h-4 text-forest-100" />
             </div>
-            <h1 className="font-semibold tracking-tight text-lg">
-              TechWatch AI
+            <h1 className="font-semibold tracking-tight text-lg text-earth-900">
+              TechWatch <span className="text-forest-600">AI</span>
             </h1>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-earth-400" />
               <input
                 type="text"
                 placeholder="Rechercher un article..."
                 aria-label="Rechercher un article"
-                className="pl-9 pr-4 py-1.5 bg-zinc-50 border border-zinc-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-shadow w-64"
+                className="pl-9 pr-4 py-1.5 bg-earth-50/80 border border-earth-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-forest-500/20 focus:border-forest-300 transition-all w-64 placeholder:text-earth-400"
               />
             </div>
             {isLoggedIn ? (
               <>
                 <Link
                   href="/settings"
-                  className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+                  className="text-sm font-medium text-earth-500 hover:text-forest-700 transition-colors"
                 >
                   Paramètres
                 </Link>
                 <form action={logout}>
                   <button
                     type="submit"
-                    className="text-sm font-medium text-zinc-500 hover:text-red-600 transition-colors"
+                    className="text-sm font-medium text-earth-500 hover:text-red-600 transition-colors"
                   >
                     Déconnexion
                   </button>
@@ -234,7 +245,7 @@ export default function DashboardClient({
             ) : (
               <Link
                 href="/login"
-                className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+                className="text-sm font-medium text-earth-500 hover:text-forest-700 transition-colors"
               >
                 Connexion
               </Link>
@@ -250,15 +261,15 @@ export default function DashboardClient({
             <motion.h2
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-bold tracking-tight text-zinc-900 mb-2"
+              className="text-3xl font-bold tracking-tight text-earth-900 mb-2"
             >
-              Votre veille, <span className="text-zinc-500">résumée.</span>
+              Votre veille, <span className="text-forest-600">résumée.</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-zinc-500"
+              className="text-earth-500"
             >
               L'IA a lu et analysé {displayedArticles.length} articles pour vous
               aujourd'hui.
@@ -266,7 +277,7 @@ export default function DashboardClient({
           </div>
           <Link
             href="/settings"
-            className="flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors px-4 py-2 rounded-md hover:bg-zinc-50 border border-zinc-200"
+            className="flex items-center gap-2 text-sm font-medium text-earth-600 hover:text-forest-700 transition-colors px-4 py-2 rounded-lg hover:bg-forest-50 border border-earth-200 shadow-sm"
           >
             <Filter className="w-4 h-4" />
             Ajuster le Prompt
@@ -291,8 +302,8 @@ export default function DashboardClient({
               className={cn(
                 "rounded-full transition-all",
                 selectedFilter === filter
-                  ? "bg-zinc-900 text-white shadow-md shadow-zinc-900/10"
-                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                  ? "bg-gradient-to-r from-forest-700 to-forest-800 text-white shadow-md shadow-forest-900/15 border-forest-700"
+                  : "bg-earth-100 text-earth-600 hover:bg-earth-200 border-earth-200/60"
               )}
             >
               {filter}
@@ -307,6 +318,9 @@ export default function DashboardClient({
           ))}
         </div>
       </main>
+
+      {/* Subtle footer gradient */}
+      <div className="h-32 bg-gradient-to-t from-earth-100/50 to-transparent" />
     </div>
   );
 }
