@@ -23,18 +23,18 @@ export function ForceRefreshButton({ lastRefresh }: { lastRefresh: Date | null }
   */
 
   return (
-    <form className="mt-6 pt-6 border-t border-zinc-100" action={action}>
+    <form className="mt-6 pt-6 border-t border-earth-200/60" action={action}>
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-zinc-900">Rafraîchir les anciens articles</h3>
-            <p className="text-xs text-zinc-500">Applique vos nouvelles préférences aux résumés existants.</p>
+            <h3 className="text-sm font-medium text-earth-900">Rafraîchir les anciens articles</h3>
+            <p className="text-xs text-earth-500">Applique vos nouvelles préférences aux résumés existants.</p>
           </div>
           <Button 
             type="submit" 
             variant="outline" 
             disabled={isPending || isRateLimited}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border-earth-200 text-earth-700 hover:bg-forest-50 hover:text-forest-700 hover:border-forest-200"
           >
             <RefreshCw className={`w-4 h-4 ${isPending ? "animate-spin" : ""}`} />
             {isPending ? "Génération en cours..." : "Forcer la mise à jour"}
@@ -48,13 +48,13 @@ export function ForceRefreshButton({ lastRefresh }: { lastRefresh: Date | null }
         )}
 
         {state?.error && (
-          <p className="text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
+          <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200/60">
             {state.error}
           </p>
         )}
 
         {state?.success && (
-          <p className="text-xs text-green-600 bg-green-50 p-2 rounded-lg border border-green-100">
+          <p className="text-xs text-forest-700 bg-forest-50 p-2.5 rounded-xl border border-forest-200/60">
             {state.message}
           </p>
         )}
